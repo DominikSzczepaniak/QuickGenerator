@@ -1,96 +1,42 @@
 import Navbar from "./components/Navbar";
 import Category from "./components/Category";
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { DrawingComponent } from "./Types";
 
 interface CategoryProps {
   id: number;
-  ppbSwitch: boolean;
-  drawings: DrawingComponent[];
   name: string;
+  handleDraw: () => [string, string];
 }
 
 function App() {
   const [categories, setCategories] = useState<CategoryProps[]>([]);
   const [drawCompleted, setDrawCompleted] = useState(false);
   const [results, setResults] = useState<string[][]>([]);
+  let handleDrawFunctions = useRef<{id: number, handleDraw: () => [string, string]}[]>([]).current;
+
+  const setHandleDrawFunctions = (fn: {id: number, handleDraw: () => [string, string]}[]) => {
+    handleDrawFunctions = fn;
+  }
 
   const addCategory = () => {
-    setCategories([...categories, { id: categories.length, ppbSwitch: false, drawings: [], name: "Type the name of this category..." }]);
+    setCategories([...categories, { id: categories.length, name: "Type the name of this category...", handleDraw: () => ["", ""]}]);
   };
 
-  const updateCategoryDrawings = (categoryId: number, drawings: DrawingComponent[]) => {
-    const updatedCategories = categories.map((category) =>
-      category.id === categoryId ? { ...category, drawings } : category
-    );
-    setCategories(updatedCategories);
-  };
-
-  function drawAnswers(categories: CategoryProps[]): [string, string][] {
-    let answers: string[] = [];
-    for (let i = 0; i < categories.length; i++) {
-      const drawings = categories[i].drawings;
-      console.log(drawings)
-      if (categories[i].ppbSwitch) {
-        let sum = 0;
-        for (let k = 0; k < drawings.length; k++) {
-          if (drawings[k].ppbValue.includes('/')) {
-            let parts = drawings[k].ppbValue.split('/');
-            sum += Number(parts[0]) / Number(parts[1]);
-          } else {
-            sum += Number(drawings[k].ppbValue);
-          }
-        }
-        if (sum + 0.1 < 1 && sum > 1) {
-          alert("The sum of probabilities in one category is greater than 1. Please correct it.");
-          return [];
-        }
-        let random = Math.random();
-        let counter = 0;
-        for (let k = 0; k < drawings.length; k++) {
-          if (drawings[k].ppbValue.includes('/')) {
-            let parts = drawings[k].ppbValue.split('/');
-            counter += Number(parts[0]) / Number(parts[1]);
-          } else {
-            counter += Number(drawings[k].ppbValue);
-          }
-          if (counter >= random) {
-            answers.push(drawings[k].inputValue);
-            break;
-          }
-        }
-      } else {
-
-        let elements: [number, string][] = [];
-        let sum = 0;
-        for (let j = 0; j < drawings.length; j++) {
-          elements.push([Number(drawings[j].countValue), drawings[j].inputValue]);
-          sum += Number(drawings[j].countValue);
-        }
-        console.log(sum)
-        console.log(elements)
-        let random = Math.random() * sum;
-        let counter = 0;
-        for (let j = 0; j < elements.length; j++) {
-          counter += elements[j][0];
-          if (counter >= random) {
-            answers.push(elements[j][1]);
-            break;
-          }
-        }
-      }
-    }
-    let results: [string, string][] = [];
-    for (let i = 0; i < answers.length; i++) {
-      results.push([categories[i].name, answers[i]]);
-    }
-    console.log(answers);
+  function drawAnswers(): [string, string][] {
+    const results = handleDrawFunctions.map(fn => fn.handleDraw());
     return results;
+  }
+
+  const registerHandleDraw = (id: number, handleDraw: () => [string, string]) => {
+    let current = handleDrawFunctions.filter(fn => fn.id !== id);
+    current.push({id, handleDraw});
+    setHandleDrawFunctions(current);
   }
   
 
   const handleDrawClick = () => {
-    let answers = drawAnswers(categories);
+    let answers = drawAnswers();
     if (answers.length > 0) {
       setResults(answers);
       setDrawCompleted(true);
@@ -138,7 +84,7 @@ function App() {
               deleteCategory={(id: number) => {
                 setCategories(categories.filter((category) => category.id !== id));
               }}
-              updateCategoryDrawings={updateCategoryDrawings}
+              registerHandleDraw={registerHandleDraw}
             />
           ))
         )}
