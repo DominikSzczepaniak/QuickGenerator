@@ -6,15 +6,16 @@ interface CategoryProps {
     id: number;
     deleteCategory: (id: number) => void;
     registerHandleDraw: (id: number, handleDraw: () => [string, string]) => void;
+    registerSaveData: (id: number, saveData: () => {name: string, drawings: {ppbValue: string, countValue: string, inputValue: string}[]}) => void;
+    registerLoadData: (id: number, loadData: (data: {name: string, drawings: {ppbValue: string, countValue: string, inputValue: string}[]}) => void) => void;
 }
 
 function Category(props: CategoryProps) {
-    const { id, deleteCategory, registerHandleDraw } = props;
+    const { id, deleteCategory, registerHandleDraw, registerSaveData, registerLoadData } = props;
     const [drawings, setDrawings] = useState<DrawingComponent[]>([{ id: 1, ppbValue: "1", countValue: "1", inputValue: "Enter the name of this draw..." }]);
     const [hidden, setHidden] = useState(false);
     const [name, setName] = useState("Type the name of this category...");
     const [ppbSwitch, setPpbSwitch] = useState(false);
-    const handleDrawRef = useRef<() => [string, string] | null>(null);
 
     const addDrawing = () => {
         const newDrawingId = drawings.length + 1;
@@ -103,6 +104,27 @@ function Category(props: CategoryProps) {
             return handleDrawCount();
         }
     }, [handleDrawProbability, handleDrawCount, ppbSwitch]);
+
+    function saveData() {
+        let draws = [];
+        for(let i = 0; i < drawings.length; i++) {
+            draws.push({ppbValue: drawings[i].ppbValue, countValue: drawings[i].countValue, inputValue: drawings[i].inputValue});
+        }
+        return {name: name, drawings: draws};
+    }
+
+    function loadData(category: {name: string, drawings: {ppbValue: string, countValue: string, inputValue: string}[]}) {
+        setName(category.name);
+        setDrawings(category.drawings.map((drawing, index) => ({id: index + 1, ppbValue: drawing.ppbValue, countValue: drawing.countValue, inputValue: drawing.inputValue})));
+    }
+
+    useEffect(() => {
+        registerSaveData(id, saveData);
+    }, [id, registerSaveData, saveData]);
+
+    useEffect(() => {
+        registerLoadData(id, loadData);
+    }, [id, registerLoadData, loadData]);
 
     useEffect(() => {
         registerHandleDraw(id, handleDraw);
