@@ -1,7 +1,6 @@
 // import Navbar from "./components/Navbar";
 import Category from "./components/Category";
 import { useRef, useState } from 'react';
-import { DrawingComponent } from "./Types";
 
 interface CategoryProps {
   id: number;
@@ -54,14 +53,51 @@ function App() {
 
   const saveInfo = () => {
     let data = saveDataFunctions.map(fn => fn.saveData());
-    let dataString = JSON.stringify(data);
-    console.log(dataString);
-    //TODO send dataString to server and save it on the server
+    let dataString = JSON.stringify(data, null, 2); 
+
+    const blob = new Blob([dataString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'data.json'; 
+    a.click();
+
+    URL.revokeObjectURL(url);
   }
 
-  const loadData = (data: {name: string, drawings: {ppbValue: string, countValue: string, inputValue: string}[]}) => {
-    //TODO
-  }
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const json = JSON.parse(e.target?.result as string);
+          loadData(json);
+        } catch (error) {
+          console.error("Error parsing JSON:", error);
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  const loadData = (data: {name: string, drawings: {ppbValue: string, countValue: string, inputValue: string}[]}[]) => {
+    const newCategories = data.map((category, index) => ({
+      id: index,  
+      name: category.name,
+      handleDraw: () => ["", ""] as [string, string],
+      drawings: []
+    }));
+
+    setCategories(newCategories);
+
+    newCategories.forEach((category, index) => {
+      if (loadDataFunctions[index]) {
+        loadDataFunctions[index].loadData(category);
+      }
+    });
+  };
 
   return (
     <div>
@@ -85,6 +121,19 @@ function App() {
         >
           Save
         </button>
+        <button
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          onClick={() => document.getElementById('fileInput')?.click()}
+        >
+          Load
+        </button>
+        <input
+          id="fileInput"
+          type="file"
+          accept=".json"
+          onChange={handleFileUpload}
+          style={{ display: 'none' }}
+        />
         {drawCompleted ? (
           <div>
             <h2 className="text-2xl font-bold mb-4">Summary of Results</h2>
