@@ -1,24 +1,29 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Drawing from './Drawing';
 import { DrawingComponent } from '../Types';
+import Dropdown from './Dropdown';
+import { v4 as uuidv4 } from 'uuid';
 
 interface CategoryProps {
-    id: number;
-    deleteCategory: (id: number) => void;
-    registerHandleDraw: (id: number, handleDraw: () => [string, string]) => void;
-    registerSaveData: (id: number, saveData: () => {name: string, drawings: {ppbValue: string, countValue: string, inputValue: string}[]}) => void;
-    registerLoadData: (id: number, loadData: (data: {name: string, drawings: {ppbValue: string, countValue: string, inputValue: string}[]}) => void) => void;
+    id: string;
+    deleteCategory: (id: string) => void;
+    registerHandleDraw: (id: string, handleDraw: () => [string, string]) => void;
+    registerSaveData: (id: string, saveData: () => {name: string, drawings: {ppbValue: string, countValue: string, inputValue: string}[]}) => void;
+    registerLoadData: (id: string, loadData: (data: {name: string, drawings: {ppbValue: string, countValue: string, inputValue: string}[]}) => void) => void;
+    registerGetDrawings: (id: string, getDrawings: () => DrawingComponent[]) => void;
+    handleNameChange: (id: string, newName: string) => void;
+    getCategoriesNames: (excludeName: string) => string[];
 }
 
 function Category(props: CategoryProps) {
-    const { id, deleteCategory, registerHandleDraw, registerSaveData, registerLoadData } = props;
-    const [drawings, setDrawings] = useState<DrawingComponent[]>([{ id: 1, ppbValue: "1", countValue: "1", inputValue: "Enter the name of this draw..." }]);
+    const { id, deleteCategory, registerHandleDraw, registerSaveData, registerLoadData, registerGetDrawings, handleNameChange, getCategoriesNames } = props;
+    const [drawings, setDrawings] = useState<DrawingComponent[]>([{ id: uuidv4(), ppbValue: "1", countValue: "1", inputValue: "Enter the name of this draw..." }]);
     const [hidden, setHidden] = useState(false);
     const [name, setName] = useState("Type the name of this category...");
     const [ppbSwitch, setPpbSwitch] = useState(false);
 
     const addDrawing = () => {
-        const newDrawingId = drawings.length + 1;
+        const newDrawingId = uuidv4();
         setDrawings([...drawings, { id: newDrawingId, ppbValue: "1", countValue: "1", inputValue: "Enter the name of this draw..." }]);
     };
 
@@ -26,8 +31,9 @@ function Category(props: CategoryProps) {
         setHidden(!hidden);
     };
 
-    const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleNameChangeInternal = (e: React.ChangeEvent<HTMLInputElement>) => {
         setName(e.target.value);
+        handleNameChange(id, e.target.value);
     };
 
     const handleFocus = () => {
@@ -115,8 +121,12 @@ function Category(props: CategoryProps) {
 
     function loadData(category: {name: string, drawings: {ppbValue: string, countValue: string, inputValue: string}[]}) {
         setName(category.name);
-        setDrawings(category.drawings.map((drawing, index) => ({id: index + 1, ppbValue: drawing.ppbValue, countValue: drawing.countValue, inputValue: drawing.inputValue})));
+        setDrawings(category.drawings.map((drawing, index) => ({id: String(index), ppbValue: drawing.ppbValue, countValue: drawing.countValue, inputValue: drawing.inputValue})));
     }
+
+    const getDrawings = () => {
+        return drawings;
+    };
 
     useEffect(() => {
         registerSaveData(id, saveData);
@@ -130,6 +140,10 @@ function Category(props: CategoryProps) {
         registerHandleDraw(id, handleDraw);
     }, [id, registerHandleDraw, handleDraw]);
 
+    useEffect(() => {
+        registerGetDrawings(id, getDrawings);
+    }, [id, registerGetDrawings, getDrawings]);
+
     return (
         <div className="p-4 border rounded shadow-md mb-4">
             <div className="flex items-center justify-between mb-2">
@@ -137,21 +151,22 @@ function Category(props: CategoryProps) {
                     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
                     onClick={togglePpbSwitch}
                 >
-                    {ppbSwitch ? "Change to count" : "Change to probability"}
+                    {ppbSwitch ? "Change to amounts" : "Change to probability"}
+                </button>
+                <button
+                    className="bg-blue-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ml-2"
+                    onClick={addDrawing}
+                >
+                    Add drawing option {id}
                 </button>
                 <input
                     type="text"
                     value={name}
-                    onChange={handleNameChange}
+                    onChange={handleNameChangeInternal}
                     onFocus={handleFocus}
                     className="border border-gray-400 rounded px-3 py-2 focus:outline-none focus:border-blue-500 flex-grow ml-2"
                 />
-                <button
-                    className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ml-2"
-                    onClick={addDrawing}
-                >
-                    Add drawing option
-                </button>
+                <Dropdown categories={getCategoriesNames(name)}/>
                 <button
                     className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded ml-2"
                     onClick={() => deleteCategory(id)}
@@ -172,7 +187,7 @@ function Category(props: CategoryProps) {
                             key={drawing.id}
                             id={drawing.id}
                             ppbSwitch={ppbSwitch}
-                            handleDelete={(drawingId: number) => {
+                            handleDelete={(drawingId: string) => {
                                 setDrawings(drawings.filter((drawing) => drawing.id !== drawingId));
                             }}
                             updateDrawing={(updatedDrawing: DrawingComponent) => updateDrawing(updatedDrawing)}

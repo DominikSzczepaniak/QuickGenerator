@@ -1,12 +1,12 @@
 export interface DrawingComponent {
-    id: number;
+    id: string;
     ppbValue: string;
     countValue: string;
     inputValue: string;
 }
 
 export interface CategoryProps {
-    id: number;
+    id: string;
     ppbSwitch: boolean;
     drawings: DrawingComponent[];
   }

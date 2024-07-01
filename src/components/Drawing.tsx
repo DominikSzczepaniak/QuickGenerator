@@ -2,9 +2,9 @@ import { useState, ChangeEvent, KeyboardEvent } from 'react';
 import { DrawingComponent } from '../Types';
 
 interface DrawingProps {
-  id: number;
+  id: string;
   ppbSwitch: boolean;
-  handleDelete: (id: number) => void;
+  handleDelete: (id: string) => void;
   updateDrawing: (drawing: DrawingComponent) => void;
   ppbValue: string;
   countValue: string;

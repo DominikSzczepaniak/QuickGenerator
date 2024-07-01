@@ -1,11 +1,14 @@
 // import Navbar from "./components/Navbar";
+import { DrawingComponent } from "./Types";
 import Category from "./components/Category";
 import { useRef, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 interface CategoryProps {
-  id: number;
+  id: string;
   name: string;
   handleDraw: () => [string, string];
+  getDrawings: () => [];
 }
 
 //TODO
@@ -13,18 +16,19 @@ interface CategoryProps {
 // 2. Make reading the website easier
 // 3. Change style of it, add dark theme
 // 4. Make tests
-// 5. Allow user to reroll, dont just reset
+// 5. Problem with deleting and ID's - it should either lower when deleted some id < then itself. For example if we have ids 0,1,2,3 and we delete 2 then we have 0,1,3, when we add again its 0,1,3,3 which is incorrect
 
 function App() {
   const [categories, setCategories] = useState<CategoryProps[]>([]);
   const [drawCompleted, setDrawCompleted] = useState(false);
   const [results, setResults] = useState<string[][]>([]);
-  let handleDrawFunctions = useRef<{ id: number, handleDraw: () => [string, string] }[]>([]).current;
-  let saveDataFunctions = useRef<{ id: number, saveData: () => { name: string, drawings: { ppbValue: string, countValue: string, inputValue: string }[] } }[]>([]).current;
-  let loadDataFunctions = useRef<{ id: number, loadData: (data: { name: string, drawings: { ppbValue: string, countValue: string, inputValue: string }[] }) => void }[]>([]).current;
+  let handleDrawFunctions = useRef<{ id: string, handleDraw: () => [string, string] }[]>([]).current;
+  let saveDataFunctions = useRef<{ id: string, saveData: () => { name: string, drawings: { ppbValue: string, countValue: string, inputValue: string }[] } }[]>([]).current;
+  let loadDataFunctions = useRef<{ id: string, loadData: (data: { name: string, drawings: { ppbValue: string, countValue: string, inputValue: string }[] }) => void }[]>([]).current;
+  let getDrawingsFunctions = useRef<{ id: string, getDrawings: () => DrawingComponent[] }[]>([]).current;
 
   const addCategory = () => {
-    setCategories([...categories, { id: categories.length, name: "Type the name of this category...", handleDraw: () => ["", ""] }]);
+    setCategories([...categories, { id: uuidv4(), name: "Type the name of this category...", handleDraw: () => ["", ""], getDrawings: () => [] }]);
   };
 
   function drawAnswers(): [string, string][] {
@@ -32,22 +36,28 @@ function App() {
     return results;
   }
 
-  const registerHandleDraw = (id: number, handleDraw: () => [string, string]) => {
+  const registerHandleDraw = (id: string, handleDraw: () => [string, string]) => {
     let current = handleDrawFunctions.filter(fn => fn.id !== id);
     current.push({ id, handleDraw });
     handleDrawFunctions = current;
   }
 
-  const registerSaveData = (id: number, saveData: () => { name: string, drawings: { ppbValue: string, countValue: string, inputValue: string }[] }) => {
+  const registerSaveData = (id: string, saveData: () => { name: string, drawings: { ppbValue: string, countValue: string, inputValue: string }[] }) => {
     let current = saveDataFunctions.filter(fn => fn.id !== id);
     current.push({ id, saveData });
     saveDataFunctions = current;
   }
 
-  const registerLoadData = (id: number, loadData: (data: { name: string, drawings: { ppbValue: string, countValue: string, inputValue: string }[] }) => void) => {
+  const registerLoadData = (id: string, loadData: (data: { name: string, drawings: { ppbValue: string, countValue: string, inputValue: string }[] }) => void) => {
     let current = loadDataFunctions.filter(fn => fn.id !== id);
     current.push({ id, loadData });
     loadDataFunctions = current;
+  }
+
+  const registerGetDrawings = (id: string, getDrawings: () => DrawingComponent[]) => {
+    let current = getDrawingsFunctions.filter(fn => fn.id !== id);
+    current.push({ id, getDrawings });
+    getDrawingsFunctions = current;
   }
 
   const handleDrawClick = () => {
@@ -91,9 +101,10 @@ function App() {
 
   const loadData = (data: { name: string, drawings: { ppbValue: string, countValue: string, inputValue: string }[] }[]) => {
     const newCategories = data.map((category, index) => ({
-      id: index,
+      id: String(index),
       name: category.name,
       handleDraw: () => ["", ""] as [string, string],
+      getDrawings: () => [] as [],
       drawings: []
     }));
 
@@ -105,6 +116,23 @@ function App() {
       }
     });
   };
+
+  const getCategoryDrawings = (categoryName: string) => {
+    const category = categories.find(category => category.name === categoryName);
+    if (category) {
+        const getDrawingsFunction = getDrawingsFunctions.find(fn => fn.id === category.id);
+        if (getDrawingsFunction) {
+            return getDrawingsFunction.getDrawings();
+        }
+    }
+    return null;
+  };
+
+  const getCategoriesNames = (excludeName: string) => {
+    let names = new Set(categories.map(category => category.name));
+    names.delete(excludeName);
+    return Array.from(names);
+  }
 
   return (
     <div>
@@ -155,7 +183,7 @@ function App() {
               style={{ display: 'none' }}
             />
             <button
-              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+              className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
               onClick={handleDrawClick}
             >
               Draw
@@ -164,12 +192,23 @@ function App() {
               <Category
                 key={category.id}
                 id={category.id}
-                deleteCategory={(id: number) => {
+                deleteCategory={(id: string) => {
                   setCategories(categories.filter((category) => category.id !== id));
+                  handleDrawFunctions = handleDrawFunctions.filter(fn => fn.id !== id);
+                  saveDataFunctions = saveDataFunctions.filter(fn => fn.id !== id);
+                  loadDataFunctions = loadDataFunctions.filter(fn => fn.id !== id);
+                  getDrawingsFunctions = getDrawingsFunctions.filter(fn => fn.id !== id);
                 }}
+                handleNameChange={(id: string, newName: string) => {
+                  setCategories(categories.map(category => 
+                      category.id === id ? { ...category, name: newName } : category
+                  ));
+                }}
+                getCategoriesNames={getCategoriesNames}
                 registerHandleDraw={registerHandleDraw}
                 registerSaveData={registerSaveData}
                 registerLoadData={registerLoadData}
+                registerGetDrawings={registerGetDrawings}
               />
             ))}
           </div>
