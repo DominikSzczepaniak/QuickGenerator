@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Drawing from './Drawing';
 import { DrawingComponent } from '../Types';
 import Dropdown from './Dropdown';
@@ -12,18 +12,17 @@ interface CategoryProps {
     registerLoadData: (id: string, loadData: (data: {name: string, drawings: {ppbValue: string, countValue: string, inputValue: string}[]}) => void) => void;
     registerGetDrawings: (id: string, getDrawings: () => DrawingComponent[]) => void;
     handleNameChange: (id: string, newName: string) => void;
+    handleVariablesChange: (id: string, newVariableCategory: string, newVariableDrawing: string) => void;
     getCategoriesNames: (excludeName: string) => string[];
     getCategoryDrawings: (categoryName: string) => DrawingComponent[] | null;
 }
 
 function Category(props: CategoryProps) {
-    const { id, deleteCategory, registerHandleDraw, registerSaveData, registerLoadData, registerGetDrawings, handleNameChange, getCategoriesNames, getCategoryDrawings } = props;
+    const { id, deleteCategory, registerHandleDraw, registerSaveData, registerLoadData, registerGetDrawings, handleNameChange, handleVariablesChange, getCategoriesNames, getCategoryDrawings } = props;
     const [drawings, setDrawings] = useState<DrawingComponent[]>([{ id: uuidv4(), ppbValue: "1", countValue: "1", inputValue: "Enter the name of this draw..." }]);
     const [hidden, setHidden] = useState(false);
     const [name, setName] = useState("Type the name of this category...");
     const [ppbSwitch, setPpbSwitch] = useState(false);
-    const [variableCategory, setVariableCategory] = useState("");
-    const [variableDrawing, setVariableDrawing] = useState("");
 
     const addDrawing = () => {
         const newDrawingId = uuidv4();
@@ -133,8 +132,7 @@ function Category(props: CategoryProps) {
 
     const getVariableDrawings = (categoryName: string, drawingName: string) => {
         if(categoryName != null && drawingName != null){
-            setVariableCategory(categoryName);
-            setVariableDrawing(drawingName);
+            handleVariablesChange(id, categoryName, drawingName);
         }
     }
 

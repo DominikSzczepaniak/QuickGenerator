@@ -7,6 +7,8 @@ import { v4 as uuidv4 } from 'uuid';
 interface CategoryProps {
   id: string;
   name: string;
+  variableCategory: string;
+  variableDrawing: string;
   handleDraw: () => [string, string];
   getDrawings: () => [];
 }
@@ -19,8 +21,8 @@ interface CategoryProps {
 // 5. Add FAQ as modal opened with button with questionmark
 // 6. When creating a category make user input a name that is not taken
 // 7. Change inputValue is Drawing to name, its misleading
-
-// Allow all categories to draw, then after drawing is complete check for variable drawing and don't return some of results
+// 8. When going back after results we dont want blank templates, we want it to be the same as before 
+// 9. Looks of variable drawing are awful
 
 function App() {
   const [categories, setCategories] = useState<CategoryProps[]>([]);
@@ -32,7 +34,7 @@ function App() {
   let getDrawingsFunctions = useRef<{ id: string, getDrawings: () => DrawingComponent[] }[]>([]).current;
 
   const addCategory = () => {
-    setCategories([...categories, { id: uuidv4(), name: "Type the name of this category...", handleDraw: () => ["", ""], getDrawings: () => [] }]);
+    setCategories([...categories, { id: uuidv4(), name: "Type the name of this category...", variableCategory: "", variableDrawing: "", handleDraw: () => ["", ""], getDrawings: () => [] }]);
   };
 
   function drawAnswers(): [string, string][] {
@@ -66,6 +68,17 @@ function App() {
 
   const handleDrawClick = () => {
     let answers = drawAnswers();
+    for(let draw of answers) { //draw is [categoryName, drawName]
+      let cat = categories.find(category => category.name === draw[0])
+      if(cat?.variableCategory !== "" && cat?.variableDrawing !== "") {
+        let drawingDepended = answers.find(answer => answer[0] === cat?.variableCategory);
+        if(drawingDepended) {
+          if(drawingDepended[1] !== draw[1]) { //if drawing depended on this draw is different, delete this draw from answers
+            answers = answers.filter(answer => answer[0] !== draw[0]);
+          }
+        } 
+      }
+    }
     if (answers.length > 0) {
       setResults(answers);
       setDrawCompleted(true);
@@ -107,6 +120,8 @@ function App() {
     const newCategories = data.map((category, index) => ({
       id: String(index),
       name: category.name,
+      variableCategory: "",
+      variableDrawing: "",
       handleDraw: () => ["", ""] as [string, string],
       getDrawings: () => [] as [],
       drawings: []
@@ -206,6 +221,11 @@ function App() {
                 handleNameChange={(id: string, newName: string) => {
                   setCategories(categories.map(category => 
                       category.id === id ? { ...category, name: newName } : category
+                  ));
+                }}
+                handleVariablesChange={(id: string, newVariableCategory: string, newVariableDrawing: string) => {
+                  setCategories(categories.map(category => 
+                      category.id === id ? { ...category, variableCategory: newVariableCategory, variableDrawing: newVariableDrawing } : category
                   ));
                 }}
                 getCategoriesNames={getCategoriesNames}
