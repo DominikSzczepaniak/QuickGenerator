@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import Drawing from './Drawing';
 import { DrawingComponent } from '../Types';
 import Dropdown from './Dropdown';
@@ -22,6 +22,8 @@ function Category(props: CategoryProps) {
     const [hidden, setHidden] = useState(false);
     const [name, setName] = useState("Type the name of this category...");
     const [ppbSwitch, setPpbSwitch] = useState(false);
+    const [variableCategory, setVariableCategory] = useState("");
+    const [variableDrawing, setVariableDrawing] = useState("");
 
     const addDrawing = () => {
         const newDrawingId = uuidv4();
@@ -129,6 +131,13 @@ function Category(props: CategoryProps) {
         return drawings;
     };
 
+    const getVariableDrawings = (categoryName: string, drawingName: string) => {
+        if(categoryName != null && drawingName != null){
+            setVariableCategory(categoryName);
+            setVariableDrawing(drawingName);
+        }
+    }
+
     useEffect(() => {
         registerSaveData(id, saveData);
     }, [id, registerSaveData, saveData]);
@@ -167,7 +176,11 @@ function Category(props: CategoryProps) {
                     onFocus={handleFocus}
                     className="border border-gray-400 rounded px-3 py-2 focus:outline-none focus:border-blue-500 flex-grow ml-2"
                 />
-                <Dropdown categories={getCategoriesNames(name)} getCategoryDrawings={getCategoryDrawings}/>
+                <Dropdown 
+                    categories={getCategoriesNames(name)} 
+                    getCategoryDrawings={getCategoryDrawings}
+                    getVariableDrawings={getVariableDrawings}
+                />
                 <button
                     className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded ml-2"
                     onClick={() => deleteCategory(id)}

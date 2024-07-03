@@ -17,6 +17,10 @@ interface CategoryProps {
 // 3. Change style of it, add dark theme
 // 4. Make tests
 // 5. Add FAQ as modal opened with button with questionmark
+// 6. When creating a category make user input a name that is not taken
+// 7. Change inputValue is Drawing to name, its misleading
+
+// Allow all categories to draw, then after drawing is complete check for variable drawing and don't return some of results
 
 function App() {
   const [categories, setCategories] = useState<CategoryProps[]>([]);

@@ -4,10 +4,11 @@ import { DrawingComponent } from '../Types';
 interface DropdownProps {
     categories: string[];
     getCategoryDrawings: (categoryName: string) => DrawingComponent[] | null;
+    getVariableDrawings: (categoryName: string, drawingName: string) => void;
 }
 
 function Dropdown(props: DropdownProps){
-    const {categories} = props;
+    const {categories, getCategoryDrawings, getVariableDrawings} = props;
     const [selectedCategory, setSelectedCategory] = useState<string>('');
     const [selectedDrawing, setSelectedDrawing] = useState<string>('');
 
@@ -17,12 +18,14 @@ function Dropdown(props: DropdownProps){
 
     const handleDrawingChange = (event: ChangeEvent<HTMLSelectElement>) => {
         setSelectedDrawing(event.target.value);
+        getVariableDrawings(selectedCategory, event.target.value);
     }
 
     let drawings: DrawingComponent[] | null = null;
     if(selectedCategory){
-        drawings = props.getCategoryDrawings(selectedCategory);
+        drawings = getCategoryDrawings(selectedCategory);
     }
+
     return (
         <div className="relative inline-block text-left">
             <select
@@ -45,7 +48,7 @@ function Dropdown(props: DropdownProps){
                 >
                     <option value="">-- For category {selectedCategory}, draw when: drawing? --</option>
                     {drawings?.map((drawing, index) => (
-                        <option key={index} value={drawing.id}>{drawing.inputValue}</option>
+                        <option key={index} value={drawing.inputValue}>{drawing.inputValue}</option>
                     ))}
                 </select>
             )}
