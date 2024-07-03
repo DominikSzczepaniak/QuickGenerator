@@ -23,6 +23,8 @@ function Category(props: CategoryProps) {
     const [hidden, setHidden] = useState(false);
     const [name, setName] = useState("Type the name of this category...");
     const [ppbSwitch, setPpbSwitch] = useState(false);
+    const [variableCategory, setVariableCategory] = useState("");
+    const [variableDrawing, setVariableDrawing] = useState("");
 
     const addDrawing = () => {
         const newDrawingId = uuidv4();
@@ -118,7 +120,7 @@ function Category(props: CategoryProps) {
         for(let i = 0; i < drawings.length; i++) {
             draws.push({ppbValue: drawings[i].ppbValue, countValue: drawings[i].countValue, inputValue: drawings[i].inputValue});
         }
-        return {name: name, drawings: draws};
+        return {name: name, variableCategory: variableCategory, variableDrawing: variableDrawing, drawings: draws};
     }
 
     function loadData(category: {name: string, drawings: {ppbValue: string, countValue: string, inputValue: string}[]}) {
@@ -132,6 +134,8 @@ function Category(props: CategoryProps) {
 
     const getVariableDrawings = (categoryName: string, drawingName: string) => {
         if(categoryName != null && drawingName != null){
+            setVariableCategory(categoryName);
+            setVariableDrawing(drawingName);
             handleVariablesChange(id, categoryName, drawingName);
         }
     }

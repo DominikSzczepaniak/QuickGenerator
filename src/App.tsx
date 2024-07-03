@@ -23,6 +23,7 @@ interface CategoryProps {
 // 7. Change inputValue is Drawing to name, its misleading
 // 8. When going back after results we dont want blank templates, we want it to be the same as before 
 // 9. Looks of variable drawing are awful
+// 10. Load variables correctly (saving already done)
 
 function App() {
   const [categories, setCategories] = useState<CategoryProps[]>([]);
