@@ -16,7 +16,7 @@ interface CategoryProps {
 // 2. Make reading the website easier
 // 3. Change style of it, add dark theme
 // 4. Make tests
-// 5. Problem with deleting and ID's - it should either lower when deleted some id < then itself. For example if we have ids 0,1,2,3 and we delete 2 then we have 0,1,3, when we add again its 0,1,3,3 which is incorrect
+// 5. Add FAQ as modal opened with button with questionmark
 
 function App() {
   const [categories, setCategories] = useState<CategoryProps[]>([]);
@@ -209,6 +209,7 @@ function App() {
                 registerSaveData={registerSaveData}
                 registerLoadData={registerLoadData}
                 registerGetDrawings={registerGetDrawings}
+                getCategoryDrawings={getCategoryDrawings}
               />
             ))}
           </div>

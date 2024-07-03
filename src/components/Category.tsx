@@ -13,10 +13,11 @@ interface CategoryProps {
     registerGetDrawings: (id: string, getDrawings: () => DrawingComponent[]) => void;
     handleNameChange: (id: string, newName: string) => void;
     getCategoriesNames: (excludeName: string) => string[];
+    getCategoryDrawings: (categoryName: string) => DrawingComponent[] | null;
 }
 
 function Category(props: CategoryProps) {
-    const { id, deleteCategory, registerHandleDraw, registerSaveData, registerLoadData, registerGetDrawings, handleNameChange, getCategoriesNames } = props;
+    const { id, deleteCategory, registerHandleDraw, registerSaveData, registerLoadData, registerGetDrawings, handleNameChange, getCategoriesNames, getCategoryDrawings } = props;
     const [drawings, setDrawings] = useState<DrawingComponent[]>([{ id: uuidv4(), ppbValue: "1", countValue: "1", inputValue: "Enter the name of this draw..." }]);
     const [hidden, setHidden] = useState(false);
     const [name, setName] = useState("Type the name of this category...");
@@ -157,7 +158,7 @@ function Category(props: CategoryProps) {
                     className="bg-blue-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ml-2"
                     onClick={addDrawing}
                 >
-                    Add drawing option {id}
+                    Add drawing option
                 </button>
                 <input
                     type="text"
@@ -166,7 +167,7 @@ function Category(props: CategoryProps) {
                     onFocus={handleFocus}
                     className="border border-gray-400 rounded px-3 py-2 focus:outline-none focus:border-blue-500 flex-grow ml-2"
                 />
-                <Dropdown categories={getCategoriesNames(name)}/>
+                <Dropdown categories={getCategoriesNames(name)} getCategoryDrawings={getCategoryDrawings}/>
                 <button
                     className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded ml-2"
                     onClick={() => deleteCategory(id)}

@@ -1,41 +1,54 @@
 import React, { useState, ChangeEvent } from 'react';
+import { DrawingComponent } from '../Types';
 
 interface DropdownProps {
     categories: string[];
-
+    getCategoryDrawings: (categoryName: string) => DrawingComponent[] | null;
 }
 
 function Dropdown(props: DropdownProps){
     const {categories} = props;
-    const [categoryNumber, setCategoryNumber] = useState(0);
-    const [selectedOption, setSelectedOption] = useState<string>('');
-
-    const handleCategoryPick = (event: ChangeEvent<HTMLSelectElement>) => {
-        setCategoryNumber(Number(event.target.value));
-    }
+    const [selectedCategory, setSelectedCategory] = useState<string>('');
+    const [selectedDrawing, setSelectedDrawing] = useState<string>('');
 
     const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
-        setSelectedOption(event.target.value);
+        setSelectedCategory(event.target.value);
     };
 
+    const handleDrawingChange = (event: ChangeEvent<HTMLSelectElement>) => {
+        setSelectedDrawing(event.target.value);
+    }
+
+    let drawings: DrawingComponent[] | null = null;
+    if(selectedCategory){
+        drawings = props.getCategoryDrawings(selectedCategory);
+    }
     return (
         <div className="relative inline-block text-left">
             <select
                 id="dropdown"
-                value={selectedOption}
+                value={selectedCategory}
                 onChange={handleChange}
                 className="bg-blue-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ml-2"
             >
-                <option value="">-- Wybierz nazwe kategorii --</option>
+                <option value="">-- Draw when: category? --</option>
                 {categories.map((category, index) => (
                     <option key={index} value={category}>{category}</option>
                 ))}
             </select>
-            {/* {selectedOption && (
-                <p className="mt-2 text-sm text-gray-500">
-                    Wybrałeś: <span className="font-medium text-gray-900">{selectedOption}</span>
-                </p>
-            )} */}
+            {selectedCategory && (
+                <select
+                    id="dropdown"
+                    value={selectedDrawing}
+                    onChange={handleDrawingChange}
+                    className="bg-blue-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ml-2"
+                >
+                    <option value="">-- For category {selectedCategory}, draw when: drawing? --</option>
+                    {drawings?.map((drawing, index) => (
+                        <option key={index} value={drawing.id}>{drawing.inputValue}</option>
+                    ))}
+                </select>
+            )}
         </div>
     );
 };
