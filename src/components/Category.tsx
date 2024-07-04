@@ -8,8 +8,8 @@ interface CategoryProps {
     id: string;
     deleteCategory: (id: string) => void;
     registerHandleDraw: (id: string, handleDraw: () => [string, string]) => void;
-    registerSaveData: (id: string, saveData: () => {name: string, drawings: {ppbValue: string, countValue: string, inputValue: string}[]}) => void;
-    registerLoadData: (id: string, loadData: (data: {name: string, drawings: {ppbValue: string, countValue: string, inputValue: string}[]}) => void) => void;
+    registerSaveData: (id: string, saveData: () => {name: string, variableCategory: string, variableDrawing: string, drawings: {ppbValue: string, countValue: string, inputValue: string}[]}) => void;
+    registerLoadData: (id: string, loadData: (data: {name: string, variableCategory: string, variableDrawing: string, drawings: {ppbValue: string, countValue: string, inputValue: string}[]}) => void) => void;
     registerGetDrawings: (id: string, getDrawings: () => DrawingComponent[]) => void;
     handleNameChange: (id: string, newName: string) => void;
     handleVariablesChange: (id: string, newVariableCategory: string, newVariableDrawing: string) => void;
@@ -123,8 +123,10 @@ function Category(props: CategoryProps) {
         return {name: name, variableCategory: variableCategory, variableDrawing: variableDrawing, drawings: draws};
     }
 
-    function loadData(category: {name: string, drawings: {ppbValue: string, countValue: string, inputValue: string}[]}) {
+    function loadData(category: {name: string, variableCategory: string, variableDrawing: string, drawings: {ppbValue: string, countValue: string, inputValue: string}[]}) {
         setName(category.name);
+        setVariableCategory(category.variableCategory);
+        setVariableDrawing(category.variableDrawing);
         setDrawings(category.drawings.map((drawing, index) => ({id: String(index), ppbValue: drawing.ppbValue, countValue: drawing.countValue, inputValue: drawing.inputValue})));
     }
 
@@ -182,6 +184,8 @@ function Category(props: CategoryProps) {
                     categories={getCategoriesNames(name)} 
                     getCategoryDrawings={getCategoryDrawings}
                     getVariableDrawings={getVariableDrawings}
+                    selectedCategory={variableCategory}
+                    selectedDrawing={variableDrawing}
                 />
                 <button
                     className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded ml-2"

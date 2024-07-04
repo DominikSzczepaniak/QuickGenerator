@@ -1,16 +1,30 @@
-import React, { useState, ChangeEvent } from 'react';
+import React, { useState, ChangeEvent, useEffect } from 'react';
 import { DrawingComponent } from '../Types';
 
 interface DropdownProps {
     categories: string[];
     getCategoryDrawings: (categoryName: string) => DrawingComponent[] | null;
     getVariableDrawings: (categoryName: string, drawingName: string) => void;
+    selectedCategory: string;
+    selectedDrawing: string;
 }
 
 function Dropdown(props: DropdownProps){
     const {categories, getCategoryDrawings, getVariableDrawings} = props;
     const [selectedCategory, setSelectedCategory] = useState<string>('');
     const [selectedDrawing, setSelectedDrawing] = useState<string>('');
+
+    useEffect(() => {
+        if (props.selectedCategory !== '') {
+            setSelectedCategory(props.selectedCategory);
+        }
+    }, [props.selectedCategory]);
+
+    useEffect(() => {
+        if (props.selectedDrawing !== '') {
+            setSelectedDrawing(props.selectedDrawing);
+        }
+    }, [props.selectedDrawing]);
 
     const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
         setSelectedCategory(event.target.value);

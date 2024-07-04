@@ -1,7 +1,7 @@
 // import Navbar from "./components/Navbar";
 import { DrawingComponent } from "./Types";
 import Category from "./components/Category";
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import Modal from "./components/Modal";
 
@@ -30,9 +30,10 @@ function App() {
   const [drawCompleted, setDrawCompleted] = useState(false);
   const [results, setResults] = useState<string[][]>([]);
   const [showFaq, setShowFaq] = useState(false);
+  const [dataToLoad, setDataToLoad] = useState<{ name: string, variableCategory: string, variableDrawing: string, drawings: { ppbValue: string, countValue: string, inputValue: string }[] }[]>([]);
   let handleDrawFunctions = useRef<{ id: string, handleDraw: () => [string, string] }[]>([]).current;
-  let saveDataFunctions = useRef<{ id: string, saveData: () => { name: string, drawings: { ppbValue: string, countValue: string, inputValue: string }[] } }[]>([]).current;
-  let loadDataFunctions = useRef<{ id: string, loadData: (data: { name: string, drawings: { ppbValue: string, countValue: string, inputValue: string }[] }) => void }[]>([]).current;
+  let saveDataFunctions = useRef<{ id: string, saveData: () => { name: string, variableCategory: string, variableDrawing: string, drawings: { ppbValue: string, countValue: string, inputValue: string }[] } }[]>([]).current;
+  let loadDataFunctions = useRef<{ id: string, loadData: (data: { name: string, variableCategory: string, variableDrawing: string, drawings: { ppbValue: string, countValue: string, inputValue: string }[] }) => void }[]>([]).current;
   let getDrawingsFunctions = useRef<{ id: string, getDrawings: () => DrawingComponent[] }[]>([]).current;
 
   const addCategory = () => {
@@ -50,13 +51,13 @@ function App() {
     handleDrawFunctions = current;
   }
 
-  const registerSaveData = (id: string, saveData: () => { name: string, drawings: { ppbValue: string, countValue: string, inputValue: string }[] }) => {
+  const registerSaveData = (id: string, saveData: () => { name: string, variableCategory: string, variableDrawing: string, drawings: { ppbValue: string, countValue: string, inputValue: string }[] }) => {
     let current = saveDataFunctions.filter(fn => fn.id !== id);
     current.push({ id, saveData });
     saveDataFunctions = current;
   }
 
-  const registerLoadData = (id: string, loadData: (data: { name: string, drawings: { ppbValue: string, countValue: string, inputValue: string }[] }) => void) => {
+  const registerLoadData = (id: string, loadData: (data: { name: string, variableCategory: string, variableDrawing: string, drawings: { ppbValue: string, countValue: string, inputValue: string }[] }) => void) => {
     let current = loadDataFunctions.filter(fn => fn.id !== id);
     current.push({ id, loadData });
     loadDataFunctions = current;
@@ -118,9 +119,10 @@ function App() {
     }
   };
 
-  const loadData = (data: { name: string, drawings: { ppbValue: string, countValue: string, inputValue: string }[] }[]) => {
-    const newCategories = data.map((category, index) => ({
-      id: String(index),
+  const loadData = (data: { name: string, variableCategory: string, variableDrawing: string,  drawings: { ppbValue: string, countValue: string, inputValue: string }[] }[]) => {
+    //we create x new dummy categories that we later fill out with correct data
+    const newCategories = data.map((category) => ({
+      id: uuidv4(),
       name: category.name,
       variableCategory: "",
       variableDrawing: "",
@@ -130,13 +132,26 @@ function App() {
     }));
 
     setCategories(newCategories);
-
-    newCategories.forEach((category, index) => {
-      if (loadDataFunctions[index]) {
-        loadDataFunctions[index].loadData(category);
-      }
-    });
+    setDataToLoad(data);
+    //those categories are not registered yet, so we can run it after component is rendered
+    // data.forEach((category, index) => {
+    //   console.log(category)
+    //   if (loadDataFunctions[index]) {
+    //     loadDataFunctions[index].loadData(category);
+    //   }
+    // });
   };
+
+  useEffect(() => {
+    if(dataToLoad.length > 0) {
+      dataToLoad.forEach((category, index) => {
+        if (loadDataFunctions[index]) {
+          loadDataFunctions[index].loadData(category);
+        }
+      });
+      setDataToLoad([]);
+    }
+  });
 
   const getCategoryDrawings = (categoryName: string) => {
     const category = categories.find(category => category.name === categoryName);
@@ -153,10 +168,6 @@ function App() {
     let names = new Set(categories.map(category => category.name));
     names.delete(excludeName);
     return Array.from(names);
-  }
-
-  const openModal = () => {
-    setShowFaq(true);
   }
 
   const closeModal = () => {
