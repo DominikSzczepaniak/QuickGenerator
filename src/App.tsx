@@ -18,12 +18,10 @@ interface CategoryProps {
 // 2. Make reading the website easier
 // 3. Change style of it, add dark theme
 // 4. Make tests
-// 5. Add FAQ as modal opened with button with questionmark
 // 6. When creating a category make user input a name that is not taken
 // 7. Change inputValue is Drawing to name, its misleading
 // 8. When going back after results we dont want blank templates, we want it to be the same as before 
 // 9. Looks of variable drawing are awful
-// 10. Load variables correctly (saving already done)
 
 function App() {
   const [categories, setCategories] = useState<CategoryProps[]>([]);
@@ -71,15 +69,15 @@ function App() {
 
   const handleDrawClick = () => {
     let answers = drawAnswers();
-    for(let draw of answers) { //draw is [categoryName, drawName]
+    for (let draw of answers) { //draw is [categoryName, drawName]
       let cat = categories.find(category => category.name === draw[0])
-      if(cat?.variableCategory !== "" && cat?.variableDrawing !== "") {
+      if (cat?.variableCategory !== "" && cat?.variableDrawing !== "") {
         let drawingDepended = answers.find(answer => answer[0] === cat?.variableCategory);
-        if(drawingDepended) {
-          if(drawingDepended[1] !== draw[1]) { //if drawing depended on this draw is different, delete this draw from answers
+        if (drawingDepended) {
+          if (drawingDepended[1] !== draw[1]) { //if drawing depended on this draw is different, delete this draw from answers
             answers = answers.filter(answer => answer[0] !== draw[0]);
           }
-        } 
+        }
       }
     }
     if (answers.length > 0) {
@@ -119,7 +117,7 @@ function App() {
     }
   };
 
-  const loadData = (data: { name: string, variableCategory: string, variableDrawing: string,  drawings: { ppbValue: string, countValue: string, inputValue: string }[] }[]) => {
+  const loadData = (data: { name: string, variableCategory: string, variableDrawing: string, drawings: { ppbValue: string, countValue: string, inputValue: string }[] }[]) => {
     //we create x new dummy categories that we later fill out with correct data
     const newCategories = data.map((category) => ({
       id: uuidv4(),
@@ -133,17 +131,10 @@ function App() {
 
     setCategories(newCategories);
     setDataToLoad(data);
-    //those categories are not registered yet, so we can run it after component is rendered
-    // data.forEach((category, index) => {
-    //   console.log(category)
-    //   if (loadDataFunctions[index]) {
-    //     loadDataFunctions[index].loadData(category);
-    //   }
-    // });
   };
 
   useEffect(() => {
-    if(dataToLoad.length > 0) {
+    if (dataToLoad.length > 0) {
       dataToLoad.forEach((category, index) => {
         if (loadDataFunctions[index]) {
           loadDataFunctions[index].loadData(category);
@@ -156,10 +147,10 @@ function App() {
   const getCategoryDrawings = (categoryName: string) => {
     const category = categories.find(category => category.name === categoryName);
     if (category) {
-        const getDrawingsFunction = getDrawingsFunctions.find(fn => fn.id === category.id);
-        if (getDrawingsFunction) {
-            return getDrawingsFunction.getDrawings();
-        }
+      const getDrawingsFunction = getDrawingsFunctions.find(fn => fn.id === category.id);
+      if (getDrawingsFunction) {
+        return getDrawingsFunction.getDrawings();
+      }
     }
     return null;
   };
@@ -233,8 +224,8 @@ function App() {
               Draw
             </button>
             <button
-             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded float-right"
-             onClick={toggleModal}>
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded float-right"
+              onClick={toggleModal}>
               FAQ
             </button>
             <Modal show={showFaq} onClose={closeModal}>
@@ -274,13 +265,13 @@ function App() {
                   getDrawingsFunctions = getDrawingsFunctions.filter(fn => fn.id !== id);
                 }}
                 handleNameChange={(id: string, newName: string) => {
-                  setCategories(categories.map(category => 
-                      category.id === id ? { ...category, name: newName } : category
+                  setCategories(categories.map(category =>
+                    category.id === id ? { ...category, name: newName } : category
                   ));
                 }}
                 handleVariablesChange={(id: string, newVariableCategory: string, newVariableDrawing: string) => {
-                  setCategories(categories.map(category => 
-                      category.id === id ? { ...category, variableCategory: newVariableCategory, variableDrawing: newVariableDrawing } : category
+                  setCategories(categories.map(category =>
+                    category.id === id ? { ...category, variableCategory: newVariableCategory, variableDrawing: newVariableDrawing } : category
                   ));
                 }}
                 getCategoriesNames={getCategoriesNames}

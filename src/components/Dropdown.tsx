@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent, useEffect } from 'react';
+import { useState, ChangeEvent, useEffect } from 'react';
 import { DrawingComponent } from '../Types';
 
 interface DropdownProps {
@@ -9,8 +9,8 @@ interface DropdownProps {
     selectedDrawing: string;
 }
 
-function Dropdown(props: DropdownProps){
-    const {categories, getCategoryDrawings, getVariableDrawings} = props;
+function Dropdown(props: DropdownProps) {
+    const { categories, getCategoryDrawings, getVariableDrawings } = props;
     const [selectedCategory, setSelectedCategory] = useState<string>('');
     const [selectedDrawing, setSelectedDrawing] = useState<string>('');
 
@@ -36,7 +36,7 @@ function Dropdown(props: DropdownProps){
     }
 
     let drawings: DrawingComponent[] | null = null;
-    if(selectedCategory){
+    if (selectedCategory) {
         drawings = getCategoryDrawings(selectedCategory);
     }
 

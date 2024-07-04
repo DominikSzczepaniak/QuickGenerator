@@ -8,8 +8,8 @@ interface CategoryProps {
     id: string;
     deleteCategory: (id: string) => void;
     registerHandleDraw: (id: string, handleDraw: () => [string, string]) => void;
-    registerSaveData: (id: string, saveData: () => {name: string, variableCategory: string, variableDrawing: string, drawings: {ppbValue: string, countValue: string, inputValue: string}[]}) => void;
-    registerLoadData: (id: string, loadData: (data: {name: string, variableCategory: string, variableDrawing: string, drawings: {ppbValue: string, countValue: string, inputValue: string}[]}) => void) => void;
+    registerSaveData: (id: string, saveData: () => { name: string, variableCategory: string, variableDrawing: string, drawings: { ppbValue: string, countValue: string, inputValue: string }[] }) => void;
+    registerLoadData: (id: string, loadData: (data: { name: string, variableCategory: string, variableDrawing: string, drawings: { ppbValue: string, countValue: string, inputValue: string }[] }) => void) => void;
     registerGetDrawings: (id: string, getDrawings: () => DrawingComponent[]) => void;
     handleNameChange: (id: string, newName: string) => void;
     handleVariablesChange: (id: string, newVariableCategory: string, newVariableDrawing: string) => void;
@@ -117,17 +117,17 @@ function Category(props: CategoryProps) {
 
     function saveData() {
         let draws = [];
-        for(let i = 0; i < drawings.length; i++) {
-            draws.push({ppbValue: drawings[i].ppbValue, countValue: drawings[i].countValue, inputValue: drawings[i].inputValue});
+        for (let i = 0; i < drawings.length; i++) {
+            draws.push({ ppbValue: drawings[i].ppbValue, countValue: drawings[i].countValue, inputValue: drawings[i].inputValue });
         }
-        return {name: name, variableCategory: variableCategory, variableDrawing: variableDrawing, drawings: draws};
+        return { name: name, variableCategory: variableCategory, variableDrawing: variableDrawing, drawings: draws };
     }
 
-    function loadData(category: {name: string, variableCategory: string, variableDrawing: string, drawings: {ppbValue: string, countValue: string, inputValue: string}[]}) {
+    function loadData(category: { name: string, variableCategory: string, variableDrawing: string, drawings: { ppbValue: string, countValue: string, inputValue: string }[] }) {
         setName(category.name);
         setVariableCategory(category.variableCategory);
         setVariableDrawing(category.variableDrawing);
-        setDrawings(category.drawings.map((drawing, index) => ({id: String(index), ppbValue: drawing.ppbValue, countValue: drawing.countValue, inputValue: drawing.inputValue})));
+        setDrawings(category.drawings.map((drawing, index) => ({ id: String(index), ppbValue: drawing.ppbValue, countValue: drawing.countValue, inputValue: drawing.inputValue })));
     }
 
     const getDrawings = () => {
@@ -135,7 +135,7 @@ function Category(props: CategoryProps) {
     };
 
     const getVariableDrawings = (categoryName: string, drawingName: string) => {
-        if(categoryName != null && drawingName != null){
+        if (categoryName != null && drawingName != null) {
             setVariableCategory(categoryName);
             setVariableDrawing(drawingName);
             handleVariablesChange(id, categoryName, drawingName);
@@ -180,8 +180,8 @@ function Category(props: CategoryProps) {
                     onFocus={handleFocus}
                     className="border border-gray-400 rounded px-3 py-2 focus:outline-none focus:border-blue-500 flex-grow ml-2"
                 />
-                <Dropdown 
-                    categories={getCategoriesNames(name)} 
+                <Dropdown
+                    categories={getCategoriesNames(name)}
                     getCategoryDrawings={getCategoryDrawings}
                     getVariableDrawings={getVariableDrawings}
                     selectedCategory={variableCategory}
