@@ -3,6 +3,7 @@ import { DrawingComponent } from "./Types";
 import Category from "./components/Category";
 import { useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import Modal from "./components/Modal";
 
 interface CategoryProps {
   id: string;
@@ -14,7 +15,6 @@ interface CategoryProps {
 }
 
 //TODO
-// 1. Add conditionals to drawing
 // 2. Make reading the website easier
 // 3. Change style of it, add dark theme
 // 4. Make tests
@@ -29,6 +29,7 @@ function App() {
   const [categories, setCategories] = useState<CategoryProps[]>([]);
   const [drawCompleted, setDrawCompleted] = useState(false);
   const [results, setResults] = useState<string[][]>([]);
+  const [showFaq, setShowFaq] = useState(false);
   let handleDrawFunctions = useRef<{ id: string, handleDraw: () => [string, string] }[]>([]).current;
   let saveDataFunctions = useRef<{ id: string, saveData: () => { name: string, drawings: { ppbValue: string, countValue: string, inputValue: string }[] } }[]>([]).current;
   let loadDataFunctions = useRef<{ id: string, loadData: (data: { name: string, drawings: { ppbValue: string, countValue: string, inputValue: string }[] }) => void }[]>([]).current;
@@ -154,6 +155,18 @@ function App() {
     return Array.from(names);
   }
 
+  const openModal = () => {
+    setShowFaq(true);
+  }
+
+  const closeModal = () => {
+    setShowFaq(false);
+  }
+
+  const toggleModal = () => {
+    setShowFaq(!showFaq);
+  }
+
   return (
     <div>
       {/* <Navbar /> */}
@@ -208,6 +221,36 @@ function App() {
             >
               Draw
             </button>
+            <button
+             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded float-right"
+             onClick={toggleModal}>
+              FAQ
+            </button>
+            <Modal show={showFaq} onClose={closeModal}>
+              <div className="bg-gray-600 text-white rounded-lg p-6 shadow-lg">
+                <h2 className="text-2xl font-bold mb-4">Frequently Asked Questions</h2>
+                <div className="mb-6">
+                  <h3 className="text-xl font-semibold mb-2">What is this website for?</h3>
+                  <p className="mb-4">
+                    For every category you can add options to draw. Basic system of drawing is "count" - you type how many elements are in lotto, and then it's randomly picked. If there are 4 elements of type A and 1 element of type B then type A has 4/5 probability of picking.
+                  </p>
+                  <p>
+                    Second mode is probability mode, where you just type probability what you want for some event. Note that probabilities have to sum to 1 at the moment of drawing.
+                  </p>
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold mb-2">How to use variables?</h3>
+                  <p className="mb-4">
+                    Every category can be drawn based on another category answer. Let's consider example: you want to draw which escape room you will go to. But there is also drawing about where will you go and one of the option is escape room. Of course you don't want to draw which escape room to go to if escape room wasn't picked.
+                  </p>
+                  <p>
+                    So in category "which escape room" you can choose that it will be drawn only if category "place to go" had result of "escape room", otherwise it's not drawn.
+                  </p>
+                </div>
+              </div>
+            </Modal>
+
+
             {categories.map((category) => (
               <Category
                 key={category.id}
