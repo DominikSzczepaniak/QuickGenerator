@@ -20,7 +20,6 @@ interface CategoryProps {
 // 4. Make tests
 // 6. When creating a category make user input a name that is not taken
 // 7. Change inputValue is Drawing to name, its misleading
-// 8. When going back after results we dont want blank templates, we want it to be the same as before 
 // 9. Looks of variable drawing are awful
 
 function App() {
@@ -81,13 +80,23 @@ function App() {
       }
     }
     if (answers.length > 0) {
+      saveInfo(false);
       setResults(answers);
       setDrawCompleted(true);
     }
   };
 
-  const saveInfo = () => {
+  const saveInfo = (toFile: boolean) => {
     let data = saveDataFunctions.map(fn => fn.saveData());
+    if (toFile) {
+      saveDataToFile(data);
+    }
+    else {
+      localStorage.setItem('data', JSON.stringify(data, null, 2));
+    }
+  }
+
+  const saveDataToFile = (data: { name: string, variableCategory: string, variableDrawing: string, drawings: { ppbValue: string, countValue: string, inputValue: string }[] }[]) => {
     let dataString = JSON.stringify(data, null, 2);
 
     const blob = new Blob([dataString], { type: 'application/json' });
@@ -132,6 +141,14 @@ function App() {
     setCategories(newCategories);
     setDataToLoad(data);
   };
+
+  useEffect(() => {
+    if (localStorage.getItem('data') && !drawCompleted) {
+      const data = JSON.parse(localStorage.getItem('data') as string);
+      localStorage.removeItem('data');
+      loadData(data);
+    }
+  });
 
   useEffect(() => {
     if (dataToLoad.length > 0) {
@@ -200,7 +217,7 @@ function App() {
             </button>
             <button
               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-              onClick={() => saveInfo()}
+              onClick={() => saveInfo(true)}
             >
               Save
             </button>
