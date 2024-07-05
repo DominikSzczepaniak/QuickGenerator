@@ -125,8 +125,7 @@ function Category(props: CategoryProps) {
 
     function loadData(category: { name: string, variableCategory: string, variableDrawing: string, drawings: { ppbValue: string, countValue: string, drawingName: string }[] }) {
         setName(category.name);
-        setVariableCategory(category.variableCategory);
-        setVariableDrawing(category.variableDrawing);
+        getVariableDrawings(category.variableCategory, category.variableDrawing);
         setDrawings(category.drawings.map((drawing, index) => ({ id: String(index), ppbValue: drawing.ppbValue, countValue: drawing.countValue, drawingName: drawing.drawingName })));
     }
 

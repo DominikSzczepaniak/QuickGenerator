@@ -20,7 +20,6 @@ interface CategoryProps {
 // 4. Make tests
 // 6. When creating a category make user input a name that is not taken
 // 10. Throw exception to JSON if something is not right
-// 12. Variable drawing has error when loading data - something is not right
 
 function App() {
   const [categories, setCategories] = useState<CategoryProps[]>([]);
@@ -72,10 +71,13 @@ function App() {
       let cat = categories.find(category => category.name === draw[0])
       if (cat?.variableCategory !== "" && cat?.variableDrawing !== "") {
         let drawingDepended = answers.find(answer => answer[0] === cat?.variableCategory);
-        if (drawingDepended) {
-          if (drawingDepended[1] !== draw[1]) { //if drawing depended on this draw is different, delete this draw from answers
-            answers = answers.filter(answer => answer[0] !== draw[0]);
-          }
+        //drawingDepended[0] - name of category that this category depends on
+        //drawingDepended[1] - name of draw that this category depends on
+        //draw[0] - name of category that we are checking
+        //draw[1] - name of draw that was the result of this category
+        //we delete this draw if drawing depended on this draw is different - so when drawingDepended[1] is not cat?.variableDrawing
+        if (drawingDepended && drawingDepended[1] !== cat?.variableDrawing) { //if drawing depended on this draw is different, delete this draw from answers
+          answers = answers.filter(answer => answer[0] !== draw[0]);
         }
       }
     }
