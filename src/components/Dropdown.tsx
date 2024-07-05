@@ -10,40 +10,49 @@ interface DropdownProps {
 }
 
 function Dropdown(props: DropdownProps) {
-    const { categories, getCategoryDrawings, getVariableDrawings } = props;
+    const { categories, getCategoryDrawings, getVariableDrawings, selectedCategory: propSelectedCategory, selectedDrawing: propSelectedDrawing } = props;
     const [selectedCategory, setSelectedCategory] = useState<string>('');
     const [selectedDrawing, setSelectedDrawing] = useState<string>('');
+    const [drawings, setDrawings] = useState<DrawingComponent[] | null>(null);
 
     useEffect(() => {
-        if (props.selectedCategory !== '') {
-            setSelectedCategory(props.selectedCategory);
+        if (propSelectedCategory !== '') {
+            setSelectedCategory(propSelectedCategory);
         }
-    }, [props.selectedCategory]);
+    }, [propSelectedCategory]);
 
     useEffect(() => {
-        if (props.selectedDrawing !== '') {
-            setSelectedDrawing(props.selectedDrawing);
+        if (selectedCategory !== '') {
+            const newDrawings = getCategoryDrawings(selectedCategory);
+            setDrawings(newDrawings);
+        } else {
+            setDrawings(null);
         }
-    }, [props.selectedDrawing]);
+    }, [selectedCategory, getCategoryDrawings]);
+
+    useEffect(() => {
+        if (propSelectedDrawing !== '' && drawings) {
+            setSelectedDrawing(propSelectedDrawing);
+        }
+    }, [propSelectedDrawing, drawings]);
 
     const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
-        setSelectedCategory(event.target.value);
+        const newCategory = event.target.value;
+        setSelectedCategory(newCategory);
+        setSelectedDrawing('');
+        getVariableDrawings(newCategory, '');
     };
 
     const handleDrawingChange = (event: ChangeEvent<HTMLSelectElement>) => {
-        setSelectedDrawing(event.target.value);
-        getVariableDrawings(selectedCategory, event.target.value);
-    }
-
-    let drawings: DrawingComponent[] | null = null;
-    if (selectedCategory) {
-        drawings = getCategoryDrawings(selectedCategory);
-    }
+        const newDrawing = event.target.value;
+        setSelectedDrawing(newDrawing);
+        getVariableDrawings(selectedCategory, newDrawing);
+    };
 
     return (
         <div className="relative inline-block text-left">
             <select
-                id="dropdown"
+                id="dropdown-category"
                 value={selectedCategory}
                 onChange={handleChange}
                 className="bg-blue-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ml-2"
@@ -55,7 +64,7 @@ function Dropdown(props: DropdownProps) {
             </select>
             {selectedCategory && (
                 <select
-                    id="dropdown"
+                    id="dropdown-drawing"
                     value={selectedDrawing}
                     onChange={handleDrawingChange}
                     className="bg-blue-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ml-2"

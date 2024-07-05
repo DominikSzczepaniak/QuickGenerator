@@ -19,10 +19,8 @@ interface CategoryProps {
 // 3. Change style of it, add dark theme
 // 4. Make tests
 // 6. When creating a category make user input a name that is not taken
-// 9. Looks of variable drawing are awful
 // 10. Throw exception to JSON if something is not right
-// 11. When choosing variable drawing its not shown correctly, but choosen correctly (useEffect hook to use)
-// 12. Variable drawing is reversed - it draws when answer is not equal to variable drawing
+// 12. Variable drawing has error when loading data - something is not right
 
 function App() {
   const [categories, setCategories] = useState<CategoryProps[]>([]);
