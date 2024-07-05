@@ -19,18 +19,20 @@ interface CategoryProps {
 // 3. Change style of it, add dark theme
 // 4. Make tests
 // 6. When creating a category make user input a name that is not taken
-// 7. Change inputValue is Drawing to name, its misleading
 // 9. Looks of variable drawing are awful
+// 10. Throw exception to JSON if something is not right
+// 11. When choosing variable drawing its not shown correctly, but choosen correctly (useEffect hook to use)
+// 12. Variable drawing is reversed - it draws when answer is not equal to variable drawing
 
 function App() {
   const [categories, setCategories] = useState<CategoryProps[]>([]);
   const [drawCompleted, setDrawCompleted] = useState(false);
   const [results, setResults] = useState<string[][]>([]);
   const [showFaq, setShowFaq] = useState(false);
-  const [dataToLoad, setDataToLoad] = useState<{ name: string, variableCategory: string, variableDrawing: string, drawings: { ppbValue: string, countValue: string, inputValue: string }[] }[]>([]);
+  const [dataToLoad, setDataToLoad] = useState<{ name: string, variableCategory: string, variableDrawing: string, drawings: { ppbValue: string, countValue: string, drawingName: string }[] }[]>([]);
   let handleDrawFunctions = useRef<{ id: string, handleDraw: () => [string, string] }[]>([]).current;
-  let saveDataFunctions = useRef<{ id: string, saveData: () => { name: string, variableCategory: string, variableDrawing: string, drawings: { ppbValue: string, countValue: string, inputValue: string }[] } }[]>([]).current;
-  let loadDataFunctions = useRef<{ id: string, loadData: (data: { name: string, variableCategory: string, variableDrawing: string, drawings: { ppbValue: string, countValue: string, inputValue: string }[] }) => void }[]>([]).current;
+  let saveDataFunctions = useRef<{ id: string, saveData: () => { name: string, variableCategory: string, variableDrawing: string, drawings: { ppbValue: string, countValue: string, drawingName: string }[] } }[]>([]).current;
+  let loadDataFunctions = useRef<{ id: string, loadData: (data: { name: string, variableCategory: string, variableDrawing: string, drawings: { ppbValue: string, countValue: string, drawingName: string }[] }) => void }[]>([]).current;
   let getDrawingsFunctions = useRef<{ id: string, getDrawings: () => DrawingComponent[] }[]>([]).current;
 
   const addCategory = () => {
@@ -48,13 +50,13 @@ function App() {
     handleDrawFunctions = current;
   }
 
-  const registerSaveData = (id: string, saveData: () => { name: string, variableCategory: string, variableDrawing: string, drawings: { ppbValue: string, countValue: string, inputValue: string }[] }) => {
+  const registerSaveData = (id: string, saveData: () => { name: string, variableCategory: string, variableDrawing: string, drawings: { ppbValue: string, countValue: string, drawingName: string }[] }) => {
     let current = saveDataFunctions.filter(fn => fn.id !== id);
     current.push({ id, saveData });
     saveDataFunctions = current;
   }
 
-  const registerLoadData = (id: string, loadData: (data: { name: string, variableCategory: string, variableDrawing: string, drawings: { ppbValue: string, countValue: string, inputValue: string }[] }) => void) => {
+  const registerLoadData = (id: string, loadData: (data: { name: string, variableCategory: string, variableDrawing: string, drawings: { ppbValue: string, countValue: string, drawingName: string }[] }) => void) => {
     let current = loadDataFunctions.filter(fn => fn.id !== id);
     current.push({ id, loadData });
     loadDataFunctions = current;
@@ -96,7 +98,7 @@ function App() {
     }
   }
 
-  const saveDataToFile = (data: { name: string, variableCategory: string, variableDrawing: string, drawings: { ppbValue: string, countValue: string, inputValue: string }[] }[]) => {
+  const saveDataToFile = (data: { name: string, variableCategory: string, variableDrawing: string, drawings: { ppbValue: string, countValue: string, drawingName: string }[] }[]) => {
     let dataString = JSON.stringify(data, null, 2);
 
     const blob = new Blob([dataString], { type: 'application/json' });
@@ -126,7 +128,7 @@ function App() {
     }
   };
 
-  const loadData = (data: { name: string, variableCategory: string, variableDrawing: string, drawings: { ppbValue: string, countValue: string, inputValue: string }[] }[]) => {
+  const loadData = (data: { name: string, variableCategory: string, variableDrawing: string, drawings: { ppbValue: string, countValue: string, drawingName: string }[] }[]) => {
     //we create x new dummy categories that we later fill out with correct data
     const newCategories = data.map((category) => ({
       id: uuidv4(),
@@ -209,42 +211,44 @@ function App() {
           </div>
         ) : (
           <div>
-            <button
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-              onClick={addCategory}
-            >
-              Add category
-            </button>
-            <button
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-              onClick={() => saveInfo(true)}
-            >
-              Save
-            </button>
-            <button
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-              onClick={() => document.getElementById('fileInput')?.click()}
-            >
-              Load
-            </button>
-            <input
-              id="fileInput"
-              type="file"
-              accept=".json"
-              onChange={handleFileUpload}
-              style={{ display: 'none' }}
-            />
-            <button
-              className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-              onClick={handleDrawClick}
-            >
-              Draw
-            </button>
-            <button
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded float-right"
-              onClick={toggleModal}>
-              FAQ
-            </button>
+            <div className="sticky top-0 w-full bg-gray-400">
+              <button
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                onClick={addCategory}
+              >
+                Add category
+              </button>
+              <button
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                onClick={() => saveInfo(true)}
+              >
+                Save
+              </button>
+              <button
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                onClick={() => document.getElementById('fileInput')?.click()}
+              >
+                Load
+              </button>
+              <input
+                id="fileInput"
+                type="file"
+                accept=".json"
+                onChange={handleFileUpload}
+                style={{ display: 'none' }}
+              />
+              <button
+                className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                onClick={handleDrawClick}
+              >
+                Draw
+              </button>
+              <button
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded float-right"
+                onClick={toggleModal}>
+                FAQ
+              </button>
+            </div>
             <Modal show={showFaq} onClose={closeModal}>
               <div className="bg-gray-600 text-white rounded-lg p-6 shadow-lg">
                 <h2 className="text-2xl font-bold mb-4">Frequently Asked Questions</h2>

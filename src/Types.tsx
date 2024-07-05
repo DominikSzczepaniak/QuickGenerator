@@ -2,7 +2,7 @@ export interface DrawingComponent {
     id: string;
     ppbValue: string;
     countValue: string;
-    inputValue: string;
+    drawingName: string;
 }
 
 export interface CategoryProps {

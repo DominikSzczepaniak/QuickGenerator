@@ -8,19 +8,19 @@ interface DrawingProps {
   updateDrawing: (drawing: DrawingComponent) => void;
   ppbValue: string;
   countValue: string;
-  inputValue: string;
+  drawingName: string;
 }
 
 function Drawing(props: DrawingProps) {
-  const { id, ppbSwitch, handleDelete, updateDrawing, ppbValue: initialPpbValue, countValue: initialCountValue, inputValue: initialInputValue } = props;
+  const { id, ppbSwitch, handleDelete, updateDrawing, ppbValue: initialPpbValue, countValue: initialCountValue, drawingName: initialDrawingName } = props;
   const [ppbValue, setPpbValue] = useState(initialPpbValue);
   const [countValue, setCountValue] = useState(initialCountValue);
-  const [inputValue, setInputValue] = useState(initialInputValue);
+  const [drawingName, setDrawingName] = useState(initialDrawingName);
   const [isEditing, setIsEditing] = useState(false);
 
   const handleFocus = () => {
-    if (inputValue === "Enter the name of this draw...") {
-      setInputValue("");
+    if (drawingName === "Enter the name of this draw...") {
+      setDrawingName("");
     }
   };
 
@@ -53,12 +53,12 @@ function Drawing(props: DrawingProps) {
     if (ppbSwitch) {
       if (isValidNumber(newValue) && Number(newValue) >= 0 && Number(newValue) <= 1) {
         setPpbValue(newValue);
-        updateDrawing({ id, ppbValue: newValue, countValue, inputValue });
+        updateDrawing({ id, ppbValue: newValue, countValue, drawingName });
       } else if (isValidFraction(newValue)) {
         const [numerator, denominator] = newValue.split('/').map(Number);
         if (numerator / denominator >= 0 && numerator / denominator <= 1) {
           setPpbValue(newValue);
-          updateDrawing({ id, ppbValue: newValue, countValue, inputValue });
+          updateDrawing({ id, ppbValue: newValue, countValue, drawingName });
         }
       } else {
         alert("Please enter a probability (0 to 1) in decimal or fraction");
@@ -66,7 +66,7 @@ function Drawing(props: DrawingProps) {
     } else {
       if (isValidNumber(newValue) && Number(newValue) >= 1) {
         setCountValue(newValue);
-        updateDrawing({ id, ppbValue, countValue: newValue, inputValue });
+        updateDrawing({ id, ppbValue, countValue: newValue, drawingName });
       } else {
         alert("Please enter a natural number (integer >= 1)");
       }
@@ -94,8 +94,8 @@ function Drawing(props: DrawingProps) {
           <input
             type="text"
             onFocus={handleFocus}
-            value={inputValue}
-            onChange={(e: ChangeEvent<HTMLInputElement>) => setInputValue(e.target.value)}
+            value={drawingName}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => setDrawingName(e.target.value)}
             onKeyDown={handleKeyDown}
             className="border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-blue-500 flex-grow"
           />
@@ -106,7 +106,7 @@ function Drawing(props: DrawingProps) {
       ) : (
         <div className="flex items-center space-x-4">
           <span className="bg-gray-200 text-gray-800 px-3 py-1 rounded">{ppbSwitch ? ppbValue : countValue}</span>
-          <span className="flex-grow bg-gray-200 text-gray-800 px-3 py-1 rounded">{inputValue}</span>
+          <span className="flex-grow bg-gray-200 text-gray-800 px-3 py-1 rounded">{drawingName}</span>
           <button onClick={() => setIsEditing(true)} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
             Edit
           </button>

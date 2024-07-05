@@ -8,8 +8,8 @@ interface CategoryProps {
     id: string;
     deleteCategory: (id: string) => void;
     registerHandleDraw: (id: string, handleDraw: () => [string, string]) => void;
-    registerSaveData: (id: string, saveData: () => { name: string, variableCategory: string, variableDrawing: string, drawings: { ppbValue: string, countValue: string, inputValue: string }[] }) => void;
-    registerLoadData: (id: string, loadData: (data: { name: string, variableCategory: string, variableDrawing: string, drawings: { ppbValue: string, countValue: string, inputValue: string }[] }) => void) => void;
+    registerSaveData: (id: string, saveData: () => { name: string, variableCategory: string, variableDrawing: string, drawings: { ppbValue: string, countValue: string, drawingName: string }[] }) => void;
+    registerLoadData: (id: string, loadData: (data: { name: string, variableCategory: string, variableDrawing: string, drawings: { ppbValue: string, countValue: string, drawingName: string }[] }) => void) => void;
     registerGetDrawings: (id: string, getDrawings: () => DrawingComponent[]) => void;
     handleNameChange: (id: string, newName: string) => void;
     handleVariablesChange: (id: string, newVariableCategory: string, newVariableDrawing: string) => void;
@@ -19,7 +19,7 @@ interface CategoryProps {
 
 function Category(props: CategoryProps) {
     const { id, deleteCategory, registerHandleDraw, registerSaveData, registerLoadData, registerGetDrawings, handleNameChange, handleVariablesChange, getCategoriesNames, getCategoryDrawings } = props;
-    const [drawings, setDrawings] = useState<DrawingComponent[]>([{ id: uuidv4(), ppbValue: "1", countValue: "1", inputValue: "Enter the name of this draw..." }]);
+    const [drawings, setDrawings] = useState<DrawingComponent[]>([{ id: uuidv4(), ppbValue: "1", countValue: "1", drawingName: "Enter the name of this draw..." }]);
     const [hidden, setHidden] = useState(false);
     const [name, setName] = useState("Type the name of this category...");
     const [ppbSwitch, setPpbSwitch] = useState(false);
@@ -28,7 +28,7 @@ function Category(props: CategoryProps) {
 
     const addDrawing = () => {
         const newDrawingId = uuidv4();
-        setDrawings([...drawings, { id: newDrawingId, ppbValue: "1", countValue: "1", inputValue: "Enter the name of this draw..." }]);
+        setDrawings([...drawings, { id: newDrawingId, ppbValue: "1", countValue: "1", drawingName: "Enter the name of this draw..." }]);
     };
 
     const toggleHidden = () => {
@@ -80,7 +80,7 @@ function Category(props: CategoryProps) {
                 counter += Number(drawings[k].ppbValue);
             }
             if (counter >= random) {
-                answer[1] = drawings[k].inputValue;
+                answer[1] = drawings[k].drawingName;
                 break;
             }
         }
@@ -92,7 +92,7 @@ function Category(props: CategoryProps) {
         let elements: [number, string][] = [];
         let sum = 0;
         for (let j = 0; j < drawings.length; j++) {
-            elements.push([Number(drawings[j].countValue), drawings[j].inputValue]);
+            elements.push([Number(drawings[j].countValue), drawings[j].drawingName]);
             sum += Number(drawings[j].countValue);
         }
         let random = Math.random() * sum;
@@ -118,16 +118,16 @@ function Category(props: CategoryProps) {
     function saveData() {
         let draws = [];
         for (let i = 0; i < drawings.length; i++) {
-            draws.push({ ppbValue: drawings[i].ppbValue, countValue: drawings[i].countValue, inputValue: drawings[i].inputValue });
+            draws.push({ ppbValue: drawings[i].ppbValue, countValue: drawings[i].countValue, drawingName: drawings[i].drawingName });
         }
         return { name: name, variableCategory: variableCategory, variableDrawing: variableDrawing, drawings: draws };
     }
 
-    function loadData(category: { name: string, variableCategory: string, variableDrawing: string, drawings: { ppbValue: string, countValue: string, inputValue: string }[] }) {
+    function loadData(category: { name: string, variableCategory: string, variableDrawing: string, drawings: { ppbValue: string, countValue: string, drawingName: string }[] }) {
         setName(category.name);
         setVariableCategory(category.variableCategory);
         setVariableDrawing(category.variableDrawing);
-        setDrawings(category.drawings.map((drawing, index) => ({ id: String(index), ppbValue: drawing.ppbValue, countValue: drawing.countValue, inputValue: drawing.inputValue })));
+        setDrawings(category.drawings.map((drawing, index) => ({ id: String(index), ppbValue: drawing.ppbValue, countValue: drawing.countValue, drawingName: drawing.drawingName })));
     }
 
     const getDrawings = () => {
@@ -213,7 +213,7 @@ function Category(props: CategoryProps) {
                             updateDrawing={(updatedDrawing: DrawingComponent) => updateDrawing(updatedDrawing)}
                             ppbValue={drawing.ppbValue}
                             countValue={drawing.countValue}
-                            inputValue={drawing.inputValue}
+                            drawingName={drawing.drawingName}
                         />
                     ))}
                 </div>

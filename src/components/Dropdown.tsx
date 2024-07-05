@@ -62,7 +62,7 @@ function Dropdown(props: DropdownProps) {
                 >
                     <option value="">-- For category {selectedCategory}, draw when: drawing? --</option>
                     {drawings?.map((drawing, index) => (
-                        <option key={index} value={drawing.inputValue}>{drawing.inputValue}</option>
+                        <option key={index} value={drawing.drawingName}>{drawing.drawingName}</option>
                     ))}
                 </select>
             )}
